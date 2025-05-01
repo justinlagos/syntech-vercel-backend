@@ -55,4 +55,4 @@ Return as JSON:
     console.error("OpenAI Error:", err);
     res.status(500).json({ error: "OpenAI API call failed." });
   }
-}
+}  
