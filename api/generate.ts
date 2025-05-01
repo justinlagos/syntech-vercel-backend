@@ -20,20 +20,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const prompt = \`
-Generate 7 distinct, premium-quality social media posts for Syntech Biofuel.
-Each post should have a:
-- Headline (bold, punchy)
-- Subheadline (1–2 sentences expanding on the message)
-Avoid repeating formats. Include humor tags for any light or cheeky variations.
-Use these topics: ${topics.join(", ")}
-
-Return as JSON:
+    const prompt = `
+Generate 7 social media posts for Syntech Biofuel.
+Each post must include:
+- headline (short and catchy)
+- subheadline (1–2 lines expanding the idea)
+Return as a JSON array like:
 [
   { "headline": "...", "subheadline": "...", "isFunny": true/false },
   ...
 ]
-\`;
+Topics: ${topics.join(", ")}
+`;
 
     const completion = await openai.createChatCompletion({
       model: "gpt-4",
@@ -42,17 +40,33 @@ Return as JSON:
       max_tokens: 800,
     });
 
-    const raw = completion.data.choices[0].message?.content;
-    const match = raw?.match(/\[\s*{[\s\S]+}\s*\]/);
+    const content = completion.data.choices[0].message?.content || "";
+
+    // Attempt to extract valid JSON
+    const match = content.match(/\[\s*{[\s\S]+}\s*\]/);
     const parsed = match ? JSON.parse(match[0]) : null;
 
-    if (!parsed || !Array.isArray(parsed)) {
-      return res.status(500).json({ error: "Failed to parse OpenAI response." });
+    if (parsed && Array.isArray(parsed)) {
+      return res.status(200).json({ result: parsed });
     }
 
-    res.status(200).json({ result: parsed });
+    // fallback: parse basic numbered list
+    const fallback = content
+      .split(/\n(?=\d+\.)/)
+      .filter(Boolean)
+      .map((entry) => {
+        const [headline, ...rest] = entry.trim().split("\n");
+        return {
+          headline: headline.replace(/^\d+\.\s*/, "").trim(),
+          subheadline: rest.join(" ").trim(),
+        };
+      });
+
+    if (!fallback.length) throw new Error("No usable output");
+
+    res.status(200).json({ result: fallback });
   } catch (err) {
     console.error("OpenAI Error:", err);
     res.status(500).json({ error: "OpenAI API call failed." });
   }
-}  
+}
