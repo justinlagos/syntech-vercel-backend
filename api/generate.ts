@@ -7,7 +7,6 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS headers
   res.setHeader("Access-Control-Allow-Origin", process.env.CORS_ORIGIN || "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -21,7 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const prompt = `
+    const prompt = \`
 Generate 7 distinct, premium-quality social media posts for Syntech Biofuel.
 Each post should have a:
 - Headline (bold, punchy)
@@ -34,7 +33,7 @@ Return as JSON:
   { "headline": "...", "subheadline": "...", "isFunny": true/false },
   ...
 ]
-`;
+\`;
 
     const completion = await openai.createChatCompletion({
       model: "gpt-4",
@@ -44,8 +43,6 @@ Return as JSON:
     });
 
     const raw = completion.data.choices[0].message?.content;
-
-    // Safely attempt to parse JSON block from model
     const match = raw?.match(/\[\s*{[\s\S]+}\s*\]/);
     const parsed = match ? JSON.parse(match[0]) : null;
 
