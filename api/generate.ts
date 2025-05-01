@@ -1,4 +1,3 @@
-// pages/api/generate.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Configuration, OpenAIApi } from "openai";
 
@@ -8,17 +7,18 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  res.setHeader("Access-Control-Allow-Origin", "https://celebrated-cat-db0906.netlify.app");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
   if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Origin", "https://celebrated-cat-db0906.netlify.app");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     return res.status(200).end();
   }
 
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Only POST requests allowed" });
   }
+
+  res.setHeader("Access-Control-Allow-Origin", "https://celebrated-cat-db0906.netlify.app");
 
   try {
     const { topics } = req.body;
