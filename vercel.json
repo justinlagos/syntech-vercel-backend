@@ -1,0 +1,8 @@
+
+{
+  "functions": {
+    "api/generate.ts": {
+      "runtime": "@vercel/node"
+    }
+  }
+}
