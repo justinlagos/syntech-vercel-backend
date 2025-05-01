@@ -65,8 +65,12 @@ Topics: ${topics.join(", ")}
     if (!fallback.length) throw new Error("No usable output");
 
     res.status(200).json({ result: fallback });
-  } catch (err) {
-    console.error("OpenAI Error:", err);
-    res.status(500).json({ error: "OpenAI API call failed." });
-  }
+} catch (err: any) {
+  console.error("OpenAI Error:", err.response?.data || err.message || err);
+  res.status(500).json({
+    error: "OpenAI API call failed.",
+    details: err.response?.data || err.message || err,
+  });
+}
+
 }
